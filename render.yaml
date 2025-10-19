@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: helpdesk-backend
+    env: python
+    rootDir: backend
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+    startCommand: |
+      python manage.py migrate --noinput && gunicorn config.wsgi:application --preload --log-file -
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: helpdesk-db
+          property: connectionString
+      - key: CORS_ALLOW_ALL
+        value: true
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        value: whatsapp:+14155238886
+      - key: DEFAULT_NOTIFY_TO_WHATSAPP
+        sync: false
+      - key: TWILIO_WHATSAPP_NOTIFY
+        value: false
+
+databases:
+  - name: helpdesk-db
+    plan: free

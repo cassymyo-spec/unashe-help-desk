@@ -13,6 +13,7 @@ class TicketSerializer(serializers.ModelSerializer):
             "tenant",
             "created_by",
             "assignee",
+            "site",
             "created_at",
             "updated_at",
         ]
