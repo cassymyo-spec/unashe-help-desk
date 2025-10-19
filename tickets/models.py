@@ -20,6 +20,9 @@ class Ticket(models.Model):
     tenant = models.ForeignKey('tenants.Tenant', on_delete=models.CASCADE, related_name='tickets')
     created_by = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='tickets_created')
     assignee = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets_assigned')
+    job_card = models.FileField(upload_to='media/job_cards', null=True, blank=True)
+    site = models.ForeignKey('tenants.Site', on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets')
+    invoice = models.FileField(upload_to='media/invoices', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

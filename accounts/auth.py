@@ -7,7 +7,10 @@ from tenants.models import Tenant
 User = get_user_model()
 
 class TenantTokenObtainPairSerializer(TokenObtainPairSerializer):
+    # Make serializer expect 'email' instead of SimpleJWT's default username field
+    username_field = 'email'
     tenant_slug = serializers.SlugField(write_only=True)
+    email = serializers.EmailField(write_only=True, required=False)
 
     def validate(self, attrs):
         tenant_slug = attrs.pop("tenant_slug", None)
@@ -18,29 +21,45 @@ class TenantTokenObtainPairSerializer(TokenObtainPairSerializer):
         except Tenant.DoesNotExist:
             raise serializers.ValidationError({"tenant_slug": "Invalid tenant."})
 
-        username_field = User.USERNAME_FIELD
-        credentials = {
-            username_field: attrs.get(self.username_field),
-            "password": attrs.get("password"),
-        }
-        user = authenticate(**credentials)
-        if not user or not user.is_active:
-            raise serializers.ValidationError({"detail": "No active account found with the given credentials"})
-        if not user.tenant_id or user.tenant_id != tenant.id:
-            raise serializers.ValidationError({"detail": "User does not belong to this tenant"})
+        identifier = (
+            attrs.get("email")
+            or attrs.get(self.username_field)
+            or self.initial_data.get("email")
+            or self.initial_data.get(self.username_field)
+            or self.initial_data.get("username")
+        )
+        password = attrs.get("password") or self.initial_data.get("password")
+        if not identifier or not password:
+            raise serializers.ValidationError({"detail": "Missing credentials"})
 
-        data = super().validate({self.username_field: getattr(user, self.username_field), "password": attrs.get("password")})
-        # include tenant info and role in token (custom claims)
+        # Find user within the tenant by email first, then username
+        user = None
+        try:
+            user = User.objects.get(tenant=tenant, email=identifier)
+        except User.DoesNotExist:
+            try:
+                user = User.objects.get(tenant=tenant, username=identifier)
+            except User.DoesNotExist:
+                pass
+
+        if not user or not user.is_active or not user.check_password(password):
+            raise serializers.ValidationError({"detail": "No active account found with the given credentials"})
+
+        # Build tokens directly (do not call super().validate which relies on USERNAME_FIELD)
+        refresh = self.get_token(user)
+        data = {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "tenant": tenant.slug,
+            "role": user.role,
+        }
         self.user = user
-        data["tenant"] = tenant.slug
-        data["role"] = user.role
         return data
 
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
         token["role"] = user.role
-        token["tenant_id"] = user.tenant_id
         return token
 
 class TenantTokenObtainPairView(TokenObtainPairView):
