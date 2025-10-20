@@ -120,9 +120,17 @@ TWILIO_WHATSAPP_NOTIFY = os.environ.get("TWILIO_WHATSAPP_NOTIFY", "false").lower
 # CORS
 CORS_ALLOW_ALL_ORIGINS = os.environ.get("CORS_ALLOW_ALL", "false").lower() == "true"
 if not CORS_ALLOW_ALL_ORIGINS:
-    CORS_ALLOWED_ORIGINS = [
-        *[o for o in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",") if o],
+    env_allowed_origins = [o for o in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",") if o]
+    default_allowed_origins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://unash-help-desk-front.vercel.app",
+        "https://unash-help-desk-front-git-main-caspers-projects-5d79a53b.vercel.app",
+        "https://unash.co.zw"
     ]
+    CORS_ALLOWED_ORIGINS = env_allowed_origins or default_allowed_origins
 
 # OpenAPI / Swagger (drf-spectacular)
 SPECTACULAR_SETTINGS = {

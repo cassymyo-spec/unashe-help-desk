@@ -1,9 +1,9 @@
-from rest_framework import viewsets, permissions, exceptions
+from rest_framework import viewsets, permissions, exceptions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.conf import settings
-from .models import Ticket
-from .serializers import TicketSerializer
+from .models import Ticket, Asset
+from .serializers import TicketSerializer, AssetSerializer
 from notifications.twilio_service import send_whatsapp
 from django.db.models import Count
 
@@ -50,3 +50,23 @@ class TicketViewSet(viewsets.ModelViewSet):
         for row in agg:
             data[row["status"]] = row["c"]
         return Response(data)
+
+    @action(detail=True, methods=["post"], url_path="assets")
+    def add_asset(self, request, pk=None):
+        ticket = self.get_object()
+        file_obj = request.FILES.get("file")
+        if not file_obj:
+            return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
+        asset = Asset.objects.create(ticket=ticket, file=file_obj, name=file_obj.name)
+        serializer = AssetSerializer(asset)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["delete"], url_path="assets/(?P<asset_id>[^/.]+)")
+    def remove_asset(self, request, pk=None, asset_id=None):
+        ticket = self.get_object()
+        try:
+            asset = ticket.assets.get(pk=asset_id)
+        except Asset.DoesNotExist:
+            return Response({"error": "Asset not found"}, status=status.HTTP_404_NOT_FOUND)
+        asset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
