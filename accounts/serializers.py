@@ -21,8 +21,9 @@ class UserWriteSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         tenant = self.context.get("tenant")
+        site = self.context.get("site")
         if tenant is None:
-            raise serializers.ValidationError({"tenant": "Tenant is required"})
+            raise serializers.ValidationError({"tenant": "Tenant is r`equired"})
         password = validated_data.pop("password")
         user = User(**validated_data)
         user.tenant = tenant
@@ -133,8 +134,13 @@ class RegisterSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     role = serializers.ChoiceField(choices=User.Role.choices)
     tenant_slug = serializers.SlugField(required=False)
+    # site = serializers.CharField(write_only=True)
+    # first_name = serializers.CharField()
+    # last_name = serializers.CharField()
+    # phone = serializers.CharField()
 
     def create(self, validated_data):
+        print(validated_data)
         tenant = self.context.get("tenant")
         if tenant is None and "tenant_slug" in validated_data:
             tenant = Tenant.objects.get(slug=validated_data["tenant_slug"])
@@ -146,5 +152,9 @@ class RegisterSerializer(serializers.Serializer):
             password=validated_data["password"],
             role=validated_data["role"],
             tenant=tenant,
+            # phone=validated_data["phone"],
+            # first_name=validated_data['firstName'],
+            # last_name=validated_data['lastName'],
+            # site_id=validated_data["siteId"]
         )
         return user
