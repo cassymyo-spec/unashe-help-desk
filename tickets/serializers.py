@@ -17,11 +17,13 @@ class TicketSerializer(serializers.ModelSerializer):
             "created_by",
             "assignee",
             "site",
+            "job_card",
+            "invoice",
             "assets",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["tenant", "created_by", "created_at", "updated_at"]
+        read_only_fields = ["tenant", "created_by", "created_at", "updated_at", "job_card", "invoice"]
 
     def get_assets(self, obj):
         return AssetSerializer(obj.assets.all(), many=True).data

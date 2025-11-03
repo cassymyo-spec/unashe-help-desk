@@ -15,9 +15,9 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 try:
-    from twilio.rest import Client as TwilioClient  # type: ignore
-except Exception:  # pragma: no cover
-    TwilioClient = None  # type: ignore
+    from twilio.rest import Client as TwilioClient  
+except Exception:  
+    TwilioClient = None  
 
 User = get_user_model()
 

@@ -61,6 +61,40 @@ class TicketViewSet(viewsets.ModelViewSet):
         serializer = AssetSerializer(asset)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=["post"], url_path="job-card")
+    def upload_job_card(self, request, pk=None):
+        ticket = self.get_object()
+        if request.user.role not in ("SITE_MANAGER", "ADMIN"):
+            raise exceptions.PermissionDenied("Only site managers or admins can upload a job card")
+
+        file_obj = request.FILES.get("file")
+        if not file_obj:
+            return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if ticket.job_card:
+            ticket.job_card.delete(save=False)
+        ticket.job_card = file_obj
+        ticket.save(update_fields=["job_card"])
+        serializer = self.get_serializer(ticket)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="invoice")
+    def upload_invoice(self, request, pk=None):
+        ticket = self.get_object()
+        if request.user.role not in ("SITE_MANAGER", "ADMIN"):
+            raise exceptions.PermissionDenied("Only site managers or admins can upload an invoice")
+
+        file_obj = request.FILES.get("file")
+        if not file_obj:
+            return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if ticket.invoice:
+            ticket.invoice.delete(save=False)
+        ticket.invoice = file_obj
+        ticket.save(update_fields=["invoice"])
+        serializer = self.get_serializer(ticket)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=["delete"], url_path="assets/(?P<asset_id>[^/.]+)")
     def remove_asset(self, request, pk=None, asset_id=None):
         ticket = self.get_object()
