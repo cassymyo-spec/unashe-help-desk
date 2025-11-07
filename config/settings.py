@@ -25,7 +25,8 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "accounts",
     "tenants",
-    "tickets",
+    "tickets.apps.TicketsConfig",
+    "assets.apps.AssetsConfig", 
     "notifications",
 ]
 
@@ -56,7 +57,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
             ],
         },
-    },
+    }
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
@@ -139,3 +140,11 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
+
+
+# Media files 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+os.makedirs(MEDIA_ROOT, exist_ok=True)
+
