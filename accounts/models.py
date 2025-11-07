@@ -12,6 +12,16 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.SITE_MANAGER)
     tenant = models.ForeignKey('tenants.Tenant', on_delete=models.CASCADE, related_name="users", null=True, blank=True)
     site = models.ForeignKey('tenants.Site', on_delete=models.SET_NULL, related_name="users", null=True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True, verbose_name="Phone Number")
+
+    company_name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Company Name")
+    address = models.TextField(null=True, blank=True, verbose_name="Company Address")
+    is_active_contractor = models.BooleanField(default=True, verbose_name="Active Contractor")
+    
+    email = models.EmailField(unique=False, blank=True, null=True)  
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.username

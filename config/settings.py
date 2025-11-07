@@ -25,7 +25,8 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "accounts",
     "tenants",
-    "tickets",
+    "tickets.apps.TicketsConfig",
+    "assets.apps.AssetsConfig", 
     "notifications",
 ]
 
@@ -56,14 +57,14 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
             ],
         },
-    },
+    }
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
-if DATABASE_URL:
+if not DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600),
     }
@@ -139,3 +140,11 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
+
+
+# Media files 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+os.makedirs(MEDIA_ROOT, exist_ok=True)
+

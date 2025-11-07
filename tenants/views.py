@@ -5,6 +5,7 @@ from django.db.models import Sum
 from .models import Tenant, Site, SiteBudget
 from .serializers import TenantSerializer, SiteSerializer, SiteBudgetSerializer
 from tenants.utils import get_tenant_by_slug_or_404
+# from loguru import logger÷
 
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -26,6 +27,7 @@ class SiteViewSet(viewsets.ModelViewSet):
         return Site.objects.filter(tenant=tenant).order_by("name")
 
     def perform_create(self, serializer):
+        print(self.request.user.role)
         tenant_slug = self.kwargs.get("tenant_slug")
         tenant = get_tenant_by_slug_or_404(tenant_slug)
         serializer.save(tenant=tenant)
