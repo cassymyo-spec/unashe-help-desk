@@ -19,7 +19,7 @@ class AssetViewSet(viewsets.ModelViewSet):
             raise exceptions.PermissionDenied("Tenant mismatch")
         if not user.tenant_id:
             return Asset.objects.none()
-        return Asset.objects.filter(tenant_id=user.tenant_id).order_by("-created_at")
+        return Asset.objects.filter(tenant_id=user.tenant_id, active=True).order_by("-created_at")
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -52,13 +52,11 @@ class AssetViewSet(viewsets.ModelViewSet):
         # Update other fields
         serializer.save(updated_by=user)
         logger.success(f"Asset {instance.id} updated by {user}")
-        
-        # If quantity changed, the signal will handle the log creation
 
 
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.disable = True
+        instance.active = False
         instance.save()
         logger.success(f"Asset {instance.id} disabled by {request.user}")
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -80,4 +78,6 @@ class AssetLogViewSet(viewsets.ModelViewSet):
         except Asset.DoesNotExist:
             logger.warning(f"Asset {asset_id} not found or access denied for user {user.id}")
             return AssetLog.objects.none()    
+
+    
         
