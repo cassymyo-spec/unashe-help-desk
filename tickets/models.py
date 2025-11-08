@@ -69,6 +69,16 @@ class Ticket(models.Model):
         blank=True,
         help_text="Invoice for the work done"
     )
+    invoice_number = models.CharField(max_length=50, null=True, blank=True, help_text="Invoice reference number")
+    invoice_amount = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2, 
+        null=True, 
+        blank=True,
+        help_text="Total amount on the invoice"
+    )
+    invoice_date = models.DateField(null=True, blank=True, help_text="Date the invoice was issued")
+    total_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0, null=True, blank=True, help_text="Total cost including all charges")
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -95,6 +105,12 @@ class Ticket(models.Model):
     is_urgent = models.BooleanField(default=False)
     requires_follow_up = models.BooleanField(default=False)
     follow_up_notes = models.TextField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        # Update total_cost if invoice_amount is set
+        if self.invoice_amount is not None:
+            self.total_cost = self.invoice_amount
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.id}: {self.title} ({self.get_status_display()})"

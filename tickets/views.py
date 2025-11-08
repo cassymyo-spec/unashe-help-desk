@@ -59,8 +59,6 @@ class TicketViewSet(viewsets.ModelViewSet):
                 Q(title__icontains=search) | 
                 Q(description__icontains=search)
             )
-
-        logger.info(f"Queryset: {queryset.values()}")
             
         return queryset
         

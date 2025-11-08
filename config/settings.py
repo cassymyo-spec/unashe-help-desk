@@ -129,7 +129,7 @@ if not CORS_ALLOW_ALL_ORIGINS:
         "http://127.0.0.1:5173",
         "https://unash-help-desk-front.vercel.app",
         "https://unash-help-desk-front-git-main-caspers-projects-5d79a53b.vercel.app",
-        "https://www.unansh.co.zw"
+        "https://www.unansh.co.zw",
     ]
     CORS_ALLOWED_ORIGINS = env_allowed_origins or default_allowed_origins
 
